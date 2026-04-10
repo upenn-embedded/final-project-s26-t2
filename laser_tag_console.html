@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FriendlyFire — Referee Console</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&display=swap');
+
+  :root {
+    --bg: #0a0c10;
+    --surface: #12151c;
+    --surface2: #1a1e28;
+    --border: #2a2f3a;
+    --text: #e0e0e0;
+    --text-dim: #6b7280;
+    --accent: #f59e0b;
+    --accent-glow: rgba(245, 158, 11, 0.3);
+    --red: #ef4444;
+    --red-glow: rgba(239, 68, 68, 0.3);
+    --green: #22c55e;
+    --green-glow: rgba(34, 197, 94, 0.3);
+    --blue: #3b82f6;
+    --blue-glow: rgba(59, 130, 246, 0.3);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Scanline overlay */
+  body::after {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: repeating-linear-gradient(
+      transparent, transparent 2px,
+      rgba(0,0,0,0.08) 2px, rgba(0,0,0,0.08) 4px
+    );
+    pointer-events: none;
+    z-index: 999;
+  }
+
+  .console {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+
+  /* --- Header --- */
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 20px;
+  }
+
+  .header h1 {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 14px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  .connection-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 1px;
+  }
+
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 8px var(--green-glow);
+    animation: pulse-dot 2s ease-in-out infinite;
+  }
+
+  .status-dot.disconnected {
+    background: var(--red);
+    box-shadow: 0 0 8px var(--red-glow);
+    animation: none;
+  }
+
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  /* --- Timer --- */
+  .timer-section {
+    text-align: center;
+    padding: 30px 0;
+    margin-bottom: 20px;
+  }
+
+  .match-timer {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 80px;
+    font-weight: 700;
+    color: var(--text);
+    text-shadow: 0 0 30px rgba(255,255,255,0.1);
+    line-height: 1;
+  }
+
+  .match-status {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px;
+    letter-spacing: 4px;
+    color: var(--text-dim);
+    margin-top: 8px;
+    text-transform: uppercase;
+  }
+
+  .match-status.active { color: var(--green); }
+  .match-status.ended { color: var(--red); }
+
+  /* --- Player Cards --- */
+  .players {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  .player-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.3s;
+  }
+
+  .player-card.hit {
+    border-color: var(--red);
+    box-shadow: 0 0 20px var(--red-glow);
+  }
+
+  .player-card.eliminated {
+    opacity: 0.5;
+  }
+
+  .player-name {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 2px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  .player-name span {
+    color: var(--accent);
+  }
+
+  .stats-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .stat-box {
+    background: var(--surface2);
+    border-radius: 6px;
+    padding: 12px;
+    text-align: center;
+  }
+
+  .stat-label {
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+    font-family: 'Share Tech Mono', monospace;
+  }
+
+  .stat-value {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .stat-value.health { color: var(--green); }
+  .stat-value.health.low { color: var(--accent); }
+  .stat-value.health.critical { color: var(--red); }
+  .stat-value.ammo { color: var(--blue); }
+
+  /* Health bar */
+  .health-bar-container {
+    width: 100%;
+    height: 6px;
+    background: var(--surface2);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 8px;
+  }
+
+  .health-bar {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.5s ease, background 0.3s;
+    background: var(--green);
+  }
+
+  .health-bar.low { background: var(--accent); }
+  .health-bar.critical { background: var(--red); }
+
+  .player-status {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-align: center;
+    padding: 4px 8px;
+    border-radius: 4px;
+    background: var(--surface2);
+    color: var(--text-dim);
+  }
+
+  .player-status.alive { color: var(--green); }
+  .player-status.hit-status { color: var(--red); background: rgba(239,68,68,0.1); }
+  .player-status.dead { color: var(--red); background: rgba(239,68,68,0.15); }
+
+  /* --- Event Log --- */
+  .event-log {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-bottom: 20px;
+    max-height: 250px;
+    overflow-y: auto;
+  }
+
+  .event-log h2 {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 2px;
+    color: var(--text-dim);
+    margin-bottom: 12px;
+  }
+
+  .event {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px;
+    animation: event-in 0.3s ease-out;
+  }
+
+  @keyframes event-in {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .event-time {
+    color: var(--text-dim);
+    font-size: 12px;
+    min-width: 50px;
+  }
+
+  .event-tag {
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 3px;
+    letter-spacing: 1px;
+    font-weight: 700;
+  }
+
+  .event-tag.hit { background: rgba(239,68,68,0.2); color: var(--red); }
+  .event-tag.sys { background: rgba(59,130,246,0.2); color: var(--blue); }
+  .event-tag.kill { background: rgba(245,158,11,0.2); color: var(--accent); }
+  .event-tag.reload { background: rgba(34,197,94,0.2); color: var(--green); }
+
+  .event-text { color: var(--text); }
+
+  /* --- Controls --- */
+  .controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+  }
+
+  .btn {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 14px 20px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--surface);
+    color: var(--text);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn:hover {
+    background: var(--surface2);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .btn:active { transform: scale(0.97); }
+
+  .btn.start { border-color: var(--green); color: var(--green); }
+  .btn.start:hover { background: rgba(34,197,94,0.1); box-shadow: 0 0 15px var(--green-glow); }
+
+  .btn.end { border-color: var(--red); color: var(--red); }
+  .btn.end:hover { background: rgba(239,68,68,0.1); box-shadow: 0 0 15px var(--red-glow); }
+
+  .btn.reset { border-color: var(--accent); color: var(--accent); }
+  .btn.reset:hover { background: rgba(245,158,11,0.1); box-shadow: 0 0 15px var(--accent-glow); }
+
+  .btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+  .btn:disabled:hover {
+    background: var(--surface);
+    border-color: var(--border);
+    color: var(--text-dim);
+    box-shadow: none;
+  }
+
+  /* --- Scrollbar --- */
+  .event-log::-webkit-scrollbar { width: 4px; }
+  .event-log::-webkit-scrollbar-track { background: transparent; }
+  .event-log::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  /* --- Footer --- */
+  .footer {
+    text-align: center;
+    padding: 20px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+  }
+
+  .sim-badge {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 6px 12px;
+    border: 1px dashed var(--accent);
+    border-radius: 4px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 1px;
+  }
+
+  /* Mobile */
+  @media (max-width: 600px) {
+    .players { grid-template-columns: 1fr; }
+    .match-timer { font-size: 56px; }
+    .controls { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="console">
+  <!-- Header -->
+  <div class="header">
+    <h1>FriendlyFire Console</h1>
+    <div class="connection-status">
+      <div class="status-dot" id="statusDot"></div>
+      <span id="statusText">Simulated</span>
+    </div>
+  </div>
+
+  <!-- Timer -->
+  <div class="timer-section">
+    <div class="match-timer" id="timer">00:00</div>
+    <div class="match-status" id="matchStatus">Waiting for match</div>
+  </div>
+
+  <!-- Player Cards -->
+  <div class="players">
+    <!-- Player 1 -->
+    <div class="player-card" id="p1Card">
+      <div class="player-name">Player 1 — <span>Blaster</span></div>
+      <div class="stats-row">
+        <div class="stat-box">
+          <div class="stat-label">Health</div>
+          <div class="stat-value health" id="p1Health">100</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Ammo</div>
+          <div class="stat-value ammo" id="p1Ammo">12</div>
+        </div>
+      </div>
+      <div class="health-bar-container">
+        <div class="health-bar" id="p1HealthBar" style="width:100%"></div>
+      </div>
+      <div class="player-status alive" id="p1Status">ALIVE</div>
+    </div>
+
+    <!-- Player 2 -->
+    <div class="player-card" id="p2Card">
+      <div class="player-name">Player 2 — <span>Vest</span></div>
+      <div class="stats-row">
+        <div class="stat-box">
+          <div class="stat-label">Health</div>
+          <div class="stat-value health" id="p2Health">100</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Ammo</div>
+          <div class="stat-value ammo" id="p2Ammo">12</div>
+        </div>
+      </div>
+      <div class="health-bar-container">
+        <div class="health-bar" id="p2HealthBar" style="width:100%"></div>
+      </div>
+      <div class="player-status alive" id="p2Status">ALIVE</div>
+    </div>
+  </div>
+
+  <!-- Event Log -->
+  <div class="event-log" id="eventLog">
+    <h2>Event Log</h2>
+  </div>
+
+  <!-- Controls -->
+  <div class="controls">
+    <button class="btn start" id="btnStart" onclick="startMatch()">Start</button>
+    <button class="btn end" id="btnEnd" onclick="endMatch()" disabled>End</button>
+    <button class="btn reset" id="btnReset" onclick="resetMatch()">Reset</button>
+  </div>
+
+  <div class="sim-badge">Simulation Mode — fake data for UI testing</div>
+</div>
+
+<script>
+  // ========== Game State ==========
+  let matchRunning = false;
+  let matchSeconds = 0;
+  let timerInterval = null;
+  let simInterval = null;
+
+  const state = {
+    p1: { health: 100, ammo: 12, alive: true },
+    p2: { health: 100, ammo: 12, alive: true }
+  };
+
+  // ========== UI Updates ==========
+
+  function updatePlayerUI(num) {
+    const p = state[`p${num}`];
+    const healthEl = document.getElementById(`p${num}Health`);
+    const ammoEl = document.getElementById(`p${num}Ammo`);
+    const barEl = document.getElementById(`p${num}HealthBar`);
+    const statusEl = document.getElementById(`p${num}Status`);
+    const cardEl = document.getElementById(`p${num}Card`);
+
+    healthEl.textContent = p.health;
+    ammoEl.textContent = p.ammo;
+    barEl.style.width = p.health + '%';
+
+    // Health color classes
+    healthEl.className = 'stat-value health';
+    barEl.className = 'health-bar';
+    if (p.health <= 20) {
+      healthEl.classList.add('critical');
+      barEl.classList.add('critical');
+    } else if (p.health <= 50) {
+      healthEl.classList.add('low');
+      barEl.classList.add('low');
+    }
+
+    // Status
+    if (!p.alive) {
+      statusEl.textContent = 'ELIMINATED';
+      statusEl.className = 'player-status dead';
+      cardEl.classList.add('eliminated');
+    } else {
+      statusEl.textContent = 'ALIVE';
+      statusEl.className = 'player-status alive';
+      cardEl.classList.remove('eliminated');
+    }
+  }
+
+  function flashHit(num) {
+    const card = document.getElementById(`p${num}Card`);
+    card.classList.add('hit');
+    setTimeout(() => card.classList.remove('hit'), 500);
+
+    const statusEl = document.getElementById(`p${num}Status`);
+    statusEl.textContent = 'HIT!';
+    statusEl.className = 'player-status hit-status';
+    setTimeout(() => updatePlayerUI(num), 800);
+  }
+
+  function formatTime(s) {
+    const m = Math.floor(s / 60);
+    const sec = s % 60;
+    return String(m).padStart(2, '0') + ':' + String(sec).padStart(2, '0');
+  }
+
+  function addEvent(tag, text) {
+    const log = document.getElementById('eventLog');
+    const el = document.createElement('div');
+    el.className = 'event';
+    el.innerHTML = `
+      <span class="event-time">${formatTime(matchSeconds)}</span>
+      <span class="event-tag ${tag}">${tag.toUpperCase()}</span>
+      <span class="event-text">${text}</span>
+    `;
+    // Insert after the h2
+    const h2 = log.querySelector('h2');
+    h2.insertAdjacentElement('afterend', el);
+    log.scrollTop = 0;
+  }
+
+  // ========== Match Controls ==========
+
+  function startMatch() {
+    if (matchRunning) return;
+    matchRunning = true;
+    matchSeconds = 0;
+
+    document.getElementById('btnStart').disabled = true;
+    document.getElementById('btnEnd').disabled = false;
+    document.getElementById('matchStatus').textContent = 'Match in progress';
+    document.getElementById('matchStatus').className = 'match-status active';
+
+    addEvent('sys', 'Match started');
+
+    // Timer tick
+    timerInterval = setInterval(() => {
+      matchSeconds++;
+      document.getElementById('timer').textContent = formatTime(matchSeconds);
+    }, 1000);
+
+    // Start fake simulation
+    startSimulation();
+  }
+
+  function endMatch() {
+    if (!matchRunning) return;
+    matchRunning = false;
+
+    clearInterval(timerInterval);
+    clearInterval(simInterval);
+
+    document.getElementById('btnStart').disabled = true;
+    document.getElementById('btnEnd').disabled = true;
+    document.getElementById('matchStatus').textContent = 'Match ended';
+    document.getElementById('matchStatus').className = 'match-status ended';
+
+    // Determine winner
+    const p1h = state.p1.health;
+    const p2h = state.p2.health;
+    if (p1h > p2h) {
+      addEvent('kill', 'Player 1 wins!');
+    } else if (p2h > p1h) {
+      addEvent('kill', 'Player 2 wins!');
+    } else {
+      addEvent('sys', 'Draw!');
+    }
+    addEvent('sys', 'Match ended by referee');
+  }
+
+  function resetMatch() {
+    matchRunning = false;
+    clearInterval(timerInterval);
+    clearInterval(simInterval);
+    matchSeconds = 0;
+
+    state.p1 = { health: 100, ammo: 12, alive: true };
+    state.p2 = { health: 100, ammo: 12, alive: true };
+
+    updatePlayerUI(1);
+    updatePlayerUI(2);
+
+    document.getElementById('timer').textContent = '00:00';
+    document.getElementById('matchStatus').textContent = 'Waiting for match';
+    document.getElementById('matchStatus').className = 'match-status';
+    document.getElementById('btnStart').disabled = false;
+    document.getElementById('btnEnd').disabled = true;
+
+    // Clear events
+    const log = document.getElementById('eventLog');
+    const events = log.querySelectorAll('.event');
+    events.forEach(e => e.remove());
+
+    addEvent('sys', 'System reset — ready');
+  }
+
+  // ========== Fake Simulation ==========
+  // Simulates random hits, ammo decrements, and reloads
+  // Replace this with real WebSocket data from ESP32 later
+
+  function startSimulation() {
+    simInterval = setInterval(() => {
+      if (!matchRunning) return;
+
+      // Random: one player shoots the other
+      const shooter = Math.random() > 0.5 ? 1 : 2;
+      const target = shooter === 1 ? 2 : 1;
+      const s = state[`p${shooter}`];
+      const t = state[`p${target}`];
+
+      if (!s.alive || !t.alive) {
+        // Someone's dead, end match
+        endMatch();
+        return;
+      }
+
+      // Random event type
+      const roll = Math.random();
+
+      if (s.ammo === 0 || roll > 0.7) {
+        // Reload
+        s.ammo = 12;
+        addEvent('reload', `Player ${shooter} reloaded`);
+        updatePlayerUI(shooter);
+      } else {
+        // Shoot
+        s.ammo--;
+        updatePlayerUI(shooter);
+
+        // Hit (80% accuracy for drama)
+        if (Math.random() < 0.8) {
+          const dmg = 10;
+          t.health = Math.max(0, t.health - dmg);
+          flashHit(target);
+          addEvent('hit', `Player ${target} hit — Health: ${t.health}`);
+
+          if (t.health <= 0) {
+            t.alive = false;
+            updatePlayerUI(target);
+            addEvent('kill', `Player ${target} eliminated!`);
+            endMatch();
+          }
+        }
+      }
+    }, 1500);  // Event every 1.5 seconds
+  }
+
+  // ========== Init ==========
+  updatePlayerUI(1);
+  updatePlayerUI(2);
+  addEvent('sys', 'Console ready — waiting for match start');
+</script>
+
+</body>
+</html>
