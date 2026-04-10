@@ -107,14 +107,15 @@ int main(void)
 
     while (1)
     {
-//        event_SHOT();
-//        _delay_ms(500);
+        //select event 
+       event_SHOT();
+       _delay_ms(500);
 
-//        event_HIT();
-//        _delay_ms(500);
+    //    event_HIT();
+    //    _delay_ms(500);
 
-//        event_RELOAD();
-//        _delay_ms(1000);
+    //    event_RELOAD();
+    //    _delay_ms(1000);
     }
 
     return 0;
