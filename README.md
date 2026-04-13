@@ -227,15 +227,16 @@ Risk: IR packet reliability at 3m range hasn't been tested yet — that's a key 
 
 ### Last week's progress
 
-##### Blaster (MCU 1) — Devan & Marko
+##### Blaster (MCU 1) 
 
 - Successfully demonstrated reload action sequences to the account manager.
 
-##### Vest (MCU 2) — Victor & Kim
+##### Vest (MCU 2) 
 
 - Implemented piezo buzzer overtone generation via timer-driven PWM.
 - Source code committed and pushed to the team GitHub repository.
 - Successfully demonstrated distinct audio tones for shot, hit, and reload events to the account manager during lab session.
+- Feather pairs with browser via Web Bluetooth API; can send/receive test strings bidirectionally
 
 ### Current state of project
 
