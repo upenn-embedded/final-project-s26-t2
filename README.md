@@ -4,7 +4,7 @@
 
 **Team Number: T2**
 
-**Team Name:** 
+**Team Name:**
 
 | Team Member Name | Email Address           |
 | ---------------- | ----------------------- |
@@ -13,10 +13,9 @@
 | Kim Huang        | huangkim@seas.upenn.edu |
 | Victor Wanjohi   | vwanjohi@seas.upenn.edu |
 
-
 **GitHub Repository URL:  [https://github.com/upenn-embedded/final-project-s26-t2]([https://github.com/upenn-embedded/final-project-s26-t2]())**
 
-**GitHub Pages Website URL:** [for final submission] 
+**GitHub Pages Website URL:** [for final submission]
 
 ## Final Project Proposal
 
@@ -34,15 +33,9 @@ Laser tag is a proven recreational concept, but commercial systems are expensive
 
 The system is composed of three subsystems communicating through IR and BLE:
 
-
-
 Blaster (MCU 1 — ATmega328PB): Trigger and reload buttons (GPIO with internal pull-ups and pin-change interrupts), IR LED emitter driven through an NPN transistor (2N2222) switching 100 mA, modulated at 38 kHz via Timer1 output compare, SPI-driven ST7735 LCD breakout (128x160, onboard 3.3V level shifter), MPU6050 IMU breakout over I2C at 400 kHz (onboard LDO and level shifter for 5V-safe operation), piezo buzzer (Timer0 PWM), and a shoot-indicator LED with 220-ohm current-limiting resistor. Powered by a USB power bank providing 5V directly (no voltage regulator needed). 100 nF decoupling capacitors on MCU VCC pins.
 
-
-
 Vest (MCU 2 — ATmega328PB): Two TSOP38238 IR receivers (5V-tolerant output, connected via pin-change interrupts for hit detection), WS2812B RGB LED strip (5V, 800 kHz data line), piezo buzzer (Timer2 PWM), and an HM-10 BLE module (3.3V logic) connected through a bidirectional logic level shifter on UART TX/RX lines at 9600 baud. The vest MCU runs game state logic (health tracking, invulnerability windows, elimination detection) and reports status to the web app via BLE. Powered by a USB power bank providing 5V directly. 100 nF decoupling capacitors on MCU VCC pins.
-
-
 
 Web App (Referee Console): A browser-based application using the Web Bluetooth API that connects to the vest's BLE module. Provides match start/reset commands and displays live player health, ammo (relayed), hit events, and winner/loser at match end.
 
@@ -132,7 +125,6 @@ FOV: Field of View. dB: Decibels. SNR: Signal-to-Noise Ratio. PCB: Printed Circu
 
 ### 7. Bill of Materials (BOM)
 
-
 | Component           | Part / Model                                          | Qty     | Unit Cost | Vendor             | Purpose                                |
 | ------------------- | ----------------------------------------------------- | ------- | --------- | ------------------ | -------------------------------------- |
 | Microcontroller     | ATmega328PB                                           | 2       | Kit       | Lab / Kit          | Blaster + Vest MCUs                    |
@@ -171,7 +163,6 @@ On demo day, the system will be demonstrated as a live two-player laser tag matc
 
 **Sprint Milestones**
 
-
 | Week          | Milestone                    | Key Tasks                                                                                                                                                           |
 | ------------- | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Mar 16–22    | Parts Ordering + Prototyping | Finalize BOM, order parts, begin breadboard prototyping of IR emitter/receiver pair, set up ATmega328PB dev environments                                            |
@@ -181,7 +172,6 @@ On demo day, the system will be demonstrated as a live two-player laser tag matc
 | Apr 11–17    | MVP Demo                     | All electronics and firmware functional at basic level. Full match loop working (start, shoot, hit, eliminate, reset). Enclosures in progress. MVP Demo on Apr 17.  |
 | Apr 18–24    | Polish + Final Demo          | Finalize enclosures, polish web app UI, tune IR range/reliability, stress test full system. Final Demo Apr 24.                                                      |
 | Apr 25–27    | Final Report                 | Record demo video, write validation results for SRS/HRS, complete GitHub Pages website. Due Apr 27.                                                                 |
-
 
 | Member | Primary Responsibility                                    | Secondary                                    |
 | ------ | --------------------------------------------------------- | -------------------------------------------- |
@@ -196,9 +186,46 @@ On demo day, the system will be demonstrated as a live two-player laser tag matc
 
 ### Last week's progress
 
+**Blaster (MCU 1) — Kim & Victor:**
+
+- Trigger and reload buttons wired with GPIO and internal pull-ups, confirmed functional on breadboard.
+- IR emitter circuit assembled: 940nm IR LED driven through 2N2222 NPN transistor, switching ~100mA off a GPIO-controlled base pin.
+- ATmega328PB dev environment set up and running bare-metal C on the blaster MCU.
+  ![1776045404980](image/README/1776045404980.png)
+
+
+
+**Vest (MCU 2) — Devan & Marko:**
+
+- TSOP38238 IR receiver wired with 100nF decoupling cap on VCC (required by datasheet for stable operation). Confirmed it detects 38kHz modulated IR from the blaster emitter.
+- Basic hit detection prototype working: LED lights on valid IR detection via pin-change interrupt.
+- Vest ATmega328PB brought up on the breadboard.
+
+![1776045441887](image/README/1776045441887.png)
+
+Design Change — BLE → Feather ESP32:
+
+- Pivoted from the HM-10 BLE module to an Adafruit Feather ESP32 for the wireless link between the vest and web app. The Feather gives us Wi-Fi + BLE flexibility and a more mature software ecosystem for the web app side, while still only serving as a comms module (no application logic — all game logic remains on the ATmega328PB per course restrictions).
+
+
 ### Current state of project
 
+Core subsystems are individually coming online on breadboards. IR TX → RX link is proven at the physical layer. The BLE-to-Feather pivot is a scope adjustment but doesn't affect the ATmega firmware architecture — the Feather just replaces the HM-10 on the UART lines.
+
+Hardware status: All critical components are in hand (ATmega328PBs, TSOP38238s, IR LEDs, 2N2222s, ST7735 LCD, MPU6050). Feather ESP32 is on hand. No outstanding part orders blocking progress.
+
+Risk: IR packet reliability at 3m range hasn't been tested yet — that's a key validation target for next sprint.
+
 ### Next week's plan
+
+
+| Task                                  | Time  | Owner              | Definition of Done                                                                              |
+| ------------------------------------- | ----- | ------------------ | ----------------------------------------------------------------------------------------------- |
+| Feather ESP32 + Web App BLE link      | 2-4 h | Marko              | Feather pairs with browser via Web Bluetooth API; can send/receive test strings bidirectionally |
+| ST7735 LCD over SPI                   | 1-2 h | Kim                | LCD displays static ammo count on blaster MCU                                                   |
+| MPU6050 I2C bringup                   | 1-2 h | Kim/Devan          | Read raw accelerometer values over I2C at 400kHz, print to serial                               |
+| Piezo buzzer tones                    | 10 m  | Victor             | Timer-driven PWM produces distinct tones for shot/hit/reload events                             |
+| Migrate to circuit boards (perfboard) | 2 h   | Victor/Devan/Marko | Blaster and vest circuits soldered on perfboard, off breadboard                                 |
 
 ## Sprint Review #2
 
