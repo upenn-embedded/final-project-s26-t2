@@ -193,8 +193,6 @@ On demo day, the system will be demonstrated as a live two-player laser tag matc
 - ATmega328PB dev environment set up and running bare-metal C on the blaster MCU.
   ![1776045404980](image/README/1776045404980.png)
 
-
-
 **Vest (MCU 2) — Devan & Marko:**
 
 - TSOP38238 IR receiver wired with 100nF decoupling cap on VCC (required by datasheet for stable operation). Confirmed it detects 38kHz modulated IR from the blaster emitter.
@@ -207,7 +205,6 @@ Design Change — BLE → Feather ESP32:
 
 - Pivoted from the HM-10 BLE module to an Adafruit Feather ESP32 for the wireless link between the vest and web app. The Feather gives us Wi-Fi + BLE flexibility and a more mature software ecosystem for the web app side, while still only serving as a comms module (no application logic — all game logic remains on the ATmega328PB per course restrictions).
 
-
 ### Current state of project
 
 Core subsystems are individually coming online on breadboards. IR TX → RX link is proven at the physical layer. The BLE-to-Feather pivot is a scope adjustment but doesn't affect the ATmega firmware architecture — the Feather just replaces the HM-10 on the UART lines.
@@ -217,7 +214,6 @@ Hardware status: All critical components are in hand (ATmega328PBs, TSOP38238s, 
 Risk: IR packet reliability at 3m range hasn't been tested yet — that's a key validation target for next sprint.
 
 ### Next week's plan
-
 
 | Task                                  | Time  | Owner              | Definition of Done                                                                              |
 | ------------------------------------- | ----- | ------------------ | ----------------------------------------------------------------------------------------------- |
@@ -230,6 +226,16 @@ Risk: IR packet reliability at 3m range hasn't been tested yet — that's a key 
 ## Sprint Review #2
 
 ### Last week's progress
+
+##### Blaster (MCU 1) — Devan & Marko
+
+- Successfully demonstrated reload action sequences to the account manager.
+
+##### Vest (MCU 2) — Victor & Kim
+
+- Implemented piezo buzzer overtone generation via timer-driven PWM.
+- Source code committed and pushed to the team GitHub repository.
+- Successfully demonstrated distinct audio tones for shot, hit, and reload events to the account manager during lab session.
 
 ### Current state of project
 
