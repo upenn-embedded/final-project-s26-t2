@@ -227,11 +227,11 @@ Risk: IR packet reliability at 3m range hasn't been tested yet — that's a key 
 
 ### Last week's progress
 
-##### Blaster (MCU 1) 
+##### Blaster (MCU 1)
 
 - Successfully demonstrated reload action sequences to the account manager.
 
-##### Vest (MCU 2) 
+##### Vest (MCU 2)
 
 - Implemented piezo buzzer overtone generation via timer-driven PWM.
 - Source code committed and pushed to the team GitHub repository.
@@ -243,6 +243,15 @@ Risk: IR packet reliability at 3m range hasn't been tested yet — that's a key 
 ### Next week's plan
 
 ## MVP Demo
+
+##### Blaster (MCU 1)
+
+- Successfully demonstrated hit and reload action sequences for a complete single player game to the account manager.
+- Got the web app working
+
+##### Vest (MCU 2)
+
+- Receives hits and registers on app
 
 ## Final Report
 
