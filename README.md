@@ -244,14 +244,70 @@ Risk: IR packet reliability at 3m range hasn't been tested yet — that's a key 
 
 ## MVP Demo
 
-##### Blaster (MCU 1)
+### 1. Block Diagram:
 
-- Successfully demonstrated hit and reload action sequences for a complete single player game to the account manager.
-- Got the web app working
+```
+[Trigger BTN PD2] ──┐
+[Reload BTN PD3] ───┤
+                    ├──► ATmega328P (Transmitter)──► IR LED (PC0) ──► [air]
+[SPI LCD ST7735] ───┘         │
+                              └──► SPI Bus → ST7735 LCD
 
-##### Vest (MCU 2)
+[air] ──► TSOP38238 (PD2) ──► ATmega328P (Receiver) ──► LED (PB0)
+```
 
-- Receives hits and registers on app
+Two ATmega328P MCUs,  one handles user input, LCD feedback, and IR transmission; the other detects incoming IR and signals a hit via LED flash.
+
+### 2. Explain your firmware implementation, including application logic and critical drivers you've written.
+
+We established UART communication between the main MCU and the Feather module, defined a simple message protocol, and enabled remote reset commands and periodic status updates to the web app.
+
+We implemented a state machine to manage gameplay states (idle, firing, hit detection, reload, reset) and non-blocking timing via timers and interrupts to allow concurrent subsystem operation.
+
+At demo, the system was fully playable ,a user could fire the blaster, register hits on the vest, receive feedback, and reset the game through the web interface.
+
+### 3. Demo your device. 
+
+1. Power on → LCD shows `READY`, ammo = 12
+2. Pull trigger → LCD shows `FIRED`, ammo decrements
+3. Fire until empty → LCD shows `EMPTY`, further triggers blocked
+4. Press reload → LCD shows `RELOADING` (1.5s) → resets to `READY`, ammo = 12
+5. Fire at receiver → hit LED flashes 200ms
+
+
+
+### 4. Have you achieved some or all of your Software Requirements Specification (SRS)?
+
+| Requirement                      | Status |
+| -------------------------------- | ------ |
+| Display ammo count on startup    | Done   |
+| Decrement ammo on valid trigger  | Done   |
+| Block firing at 0 ammo           | Done   |
+| Show `EMPTY` when out of ammo  | Done   |
+| Show `RELOADING` during reload | Done   |
+
+### 5. Have you achieved some or all of your Hardware Requirements Specification (HRS)?
+
+| Requirement                  | Status |
+| ---------------------------- | ------ |
+| IR LED transmitter on PC0    | Done   |
+| SPI LCD (ST7735) integrated  | Done   |
+| Trigger button on PD2        | Done   |
+| Reload button on PD3         | Done   |
+| TSOP38238 IR receiver on PD2 | Done   |
+| Hit indicator LED on PB0     | Done   |
+
+### 6. Show off the remaining elements that will make your project whole: mechanical casework, supporting graphical user interface (GUI), web portal, etc.
+
+- **Mechanical casework** — rectangular blaster housing
+
+  ![1776835262604](image/README/1776835262604.png)
+
+  ![1776835277516](image/README/1776835277516.png)
+
+### 7. What is the riskiest part remaining of your project?
+
+During integration and migrating parts from breadboards to perfboards, some functionality might break down. We expect to solve all bugs in good time.
 
 ## Final Report
 
