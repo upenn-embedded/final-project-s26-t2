@@ -246,15 +246,8 @@ Risk: IR packet reliability at 3m range hasn't been tested yet — that's a key 
 
 ### 1. Block Diagram:
 
-```
-[Trigger BTN PD2] ──┐
-[Reload BTN PD3] ───┤
-                    ├──► ATmega328P (Transmitter)──► IR LED (PC0) ──► [air]
-[SPI LCD ST7735] ───┘         │
-                              └──► SPI Bus → ST7735 LCD
+![1777425051182](image/README/1777425051182.png)
 
-[air] ──► TSOP38238 (PD2) ──► ATmega328P (Receiver) ──► LED (PB0)
-```
 
 Two ATmega328P MCUs,  one handles user input, LCD feedback, and IR transmission; the other detects incoming IR and signals a hit via LED flash.
 
