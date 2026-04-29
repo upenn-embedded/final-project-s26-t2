@@ -266,15 +266,13 @@ We implemented a state machine to manage gameplay states (idle, firing, hit dete
 
 At demo, the system was fully playable ,a user could fire the blaster, register hits on the vest, receive feedback, and reset the game through the web interface.
 
-### 3. Demo your device. 
+### 3. Demo your device.
 
 1. Power on → LCD shows `READY`, ammo = 12
 2. Pull trigger → LCD shows `FIRED`, ammo decrements
 3. Fire until empty → LCD shows `EMPTY`, further triggers blocked
 4. Press reload → LCD shows `RELOADING` (1.5s) → resets to `READY`, ammo = 12
 5. Fire at receiver → hit LED flashes 200ms
-
-
 
 ### 4. Have you achieved some or all of your Software Requirements Specification (SRS)?
 
@@ -314,9 +312,16 @@ During integration and migrating parts from breadboards to perfboards, some func
 Don't forget to make the GitHub pages public website!
 If you’ve never made a GitHub pages website before, you can follow this webpage (though, substitute your final project repository for the GitHub username one in the quickstart guide):  [https://docs.github.com/en/pages/quickstart](https://docs.github.com/en/pages/quickstart)
 
-### 1. Video
+## 1. Video
+
+https://drive.google.com/drive/folders/1jIbaAgMy6JAKm02dPGXfAoZNbYtTDbEu?usp=drive_link
 
 ### 2. Images
+
+![](image/README/ese%20350%20pic%201.jpeg)
+![](image/README/ese%20350%20pic%202.jpeg)
+![](image/README/ese%20350%20pic%203.jpeg)
+![](image/README/ese%20350%20pic%204.jpeg)
 
 ### 3. Results
 
@@ -333,6 +338,6 @@ If you’ve never made a GitHub pages website before, you can follow this webpag
 | HRS-01 | A distance sensor shall be used for obstacle detection. The sensor shall detect obstacles at a maximum distance of at least 10 cm. | Confirmed, sensed obstacles up to 15cm. Video in "validation" folder, shows tape measure and logged output to terminal. |
 |        |                                                                                                                                    |                                                                                                                         |
 
-### 4. Conclusion
+###### 4. Conclusion
 
 ## References
