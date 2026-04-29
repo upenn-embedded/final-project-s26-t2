@@ -248,7 +248,6 @@ Risk: IR packet reliability at 3m range hasn't been tested yet — that's a key 
 
 ![1777425051182](image/README/1777425051182.png)
 
-
 Two ATmega328P MCUs,  one handles user input, LCD feedback, and IR transmission; the other detects incoming IR and signals a hit via LED flash.
 
 ### 2. Explain your firmware implementation, including application logic and critical drivers you've written.
@@ -320,34 +319,31 @@ https://drive.google.com/drive/folders/1jIbaAgMy6JAKm02dPGXfAoZNbYtTDbEu?usp=dri
 
 #### 3.1 Software Requirements Specification (SRS) Results
 
-
-| ID | Requirement | Validation Method | Status |
-|---|---|---|---|
-| SRS-01 | Blaster transmits a valid IR shot packet within 50 ms of trigger press, including preamble, shooter ID, team ID, and CRC-8. | Oscilloscope / logic analyzer capture of trigger input vs IR output timing. Decode packet structure. | Pending |
-| SRS-02 | Blaster enforces 500 ms (±50 ms) cooldown between shots to prevent spamming. | Press trigger rapidly and measure spacing between IR bursts. Verify blocked shots during cooldown. | Pending |
-| SRS-03 | Ammo decrements after each valid shot, blocks firing at zero ammo, LCD updates within 100 ms. | Fire repeatedly while filming LCD. Confirm count decreases, EMPTY state at zero, no shot output at zero ammo. | Pending |
-| SRS-04 | Reload supports 10 s hold or shake-to-reload gesture. Early release cancels hold reload. Successful reload restores max ammo. | Time hold button with stopwatch. Test early release. Shake device and verify reload + ammo reset. | Pending |
-| SRS-05 | Vest validates IR packets using carrier presence, framing, and CRC. Invalid packets ignored. | Send malformed / noise signals and verify no health loss. Send valid packets and verify hit registers. | Pending |
-| SRS-06 | Vest applies 2 s (±200 ms) invulnerability window after hit. | Fire multiple shots rapidly after first hit. Confirm only first hit counts until timeout expires. | Pending |
-| SRS-07 | Vest sends updated health/elimination state to BLE within 500 ms of state change. | Trigger hit and measure delay until console updates. | Pending |
-| SRS-08 | RESET command returns both MCUs to ready state within 1 s. | Send reset from web app and verify ammo, health, alive state restored within spec. | Pending |
-| SRS-09 | MPU6050 sampled at ≥20 Hz. Shake detected when >2g on any axis for 3 consecutive samples. | Log accelerometer timestamps and values. Verify reload triggers only when threshold met. | Pending |
-
+| ID     | Requirement                                                                                                                   | Validation Method                                                                                             | Status   |
+| ------ | ----------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- | -------- |
+| SRS-01 | Blaster transmits a valid IR shot packet within 50 ms of trigger press, including preamble, shooter ID, team ID, and CRC-8.   | Oscilloscope / logic analyzer capture of trigger input vs IR output timing. Decode packet structure.          | Complete |
+| SRS-02 | Blaster enforces 500 ms (±50 ms) cooldown between shots to prevent spamming.                                                 | Press trigger rapidly and measure spacing between IR bursts. Verify blocked shots during cooldown.            | Complete |
+| SRS-03 | Ammo decrements after each valid shot, blocks firing at zero ammo, LCD updates within 100 ms.                                 | Fire repeatedly while filming LCD. Confirm count decreases, EMPTY state at zero, no shot output at zero ammo. | Complete |
+| SRS-04 | Reload supports 10 s hold or shake-to-reload gesture. Early release cancels hold reload. Successful reload restores max ammo. | Time hold button with stopwatch. Test early release. Shake device and verify reload + ammo reset.             | Complete |
+| SRS-05 | Vest validates IR packets using carrier presence, framing, and CRC. Invalid packets ignored.                                  | Send malformed / noise signals and verify no health loss. Send valid packets and verify hit registers.        | Complete |
+| SRS-06 | Vest applies 2 s (±200 ms) invulnerability window after hit.                                                                 | Fire multiple shots rapidly after first hit. Confirm only first hit counts until timeout expires.             | Complete |
+| SRS-07 | Vest sends updated health/elimination state to BLE within 500 ms of state change.                                             | Trigger hit and measure delay until console updates.                                                          | Complete |
+| SRS-08 | RESET command returns both MCUs to ready state within 1 s.                                                                    | Send reset from web app and verify ammo, health, alive state restored within spec.                            | Complete |
+| SRS-09 | MPU6050 sampled at ≥20 Hz. Shake detected when >2g on any axis for 3 consecutive samples.                                    | Log accelerometer timestamps and values. Verify reload triggers only when threshold met.                      | Complete |
 
 #### 3.2 Hardware Requirements Specification (HRS) Results
 
-
-| ID | Requirement | Validation Method | Status |
-|---|---|---|---|
-| HRS-01 | IR emitter uses transistor-driven 940 nm LED at 100 mA, 38 kHz (±1 kHz), detectable at ≥3 m indoors. | Scope PWM frequency, measure current, range test at 3 m. | Pending |
-| HRS-02 | Vest includes at least two IR receivers for front/rear coverage. | Visual inspection + hit tests from front and rear angles. | Pending |
-| HRS-03 | LCD (ST7735 or equivalent) visible indoors and updates at ≥5 fps. | Visual inspection + timed refresh test while changing ammo/status. | Pending |
-| HRS-04 | HM-10 BLE uses bidirectional level shifter at 9600 baud and maintains link up to 5 m indoors. | UART serial verification + connection/range walk test. | Pending |
-| HRS-05 | Piezo buzzers produce ≥65 dB at 30 cm with distinct tones for shot, hit, elimination, reload. | SPL meter / phone app + listen test for distinct events. | Pending |
-| HRS-06 | Each subsystem powered by 5 V USB bank, ≥5000 mAh, supports ≥60 min gameplay. | Battery label inspection + runtime test. | Pending |
-| HRS-07 | Each ATmega328PB runs at 16 MHz, 5 V, has 100 nF decoupling caps, subsystem current <500 mA. | Inspect hardware + measure supply voltage/current draw. | Pending |
-| HRS-08 | Vest LEDs show distinct hit, low-health, and eliminated states visible from ≥2 m indoors. | Functional visual test at 2 m distance. | Pending |
-| HRS-09 | MPU6050 mounted rigidly, communicates over I2C at 400 kHz, ±4g 16-bit mode configured. | Inspect mounting + verify register config / bus timing. | Pending |
+| ID     | Requirement                                                                                            | Validation Method                                                  | Status   |
+| ------ | ------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------ | -------- |
+| HRS-01 | IR emitter uses transistor-driven 940 nm LED at 100 mA, 38 kHz (±1 kHz), detectable at ≥3 m indoors. | Scope PWM frequency, measure current, range test at 3 m.           | Complete |
+| HRS-02 | Vest includes at least two IR receivers for front/rear coverage.                                       | Visual inspection + hit tests from front and rear angles.          | Complete |
+| HRS-03 | LCD (ST7735 or equivalent) visible indoors and updates at ≥5 fps.                                     | Visual inspection + timed refresh test while changing ammo/status. | Complete |
+| HRS-04 | HM-10 BLE uses bidirectional level shifter at 9600 baud and maintains link up to 5 m indoors.          | UART serial verification + connection/range walk test.             | Complete |
+| HRS-05 | Piezo buzzers produce ≥65 dB at 30 cm with distinct tones for shot, hit, elimination, reload.         | SPL meter / phone app + listen test for distinct events.           | Complete |
+| HRS-06 | Each subsystem powered by 5 V USB bank, ≥5000 mAh, supports ≥60 min gameplay.                        | Battery label inspection + runtime test.                           | Complete |
+| HRS-07 | Each ATmega328PB runs at 16 MHz, 5 V, has 100 nF decoupling caps, subsystem current <500 mA.           | Inspect hardware + measure supply voltage/current draw.            | Complete |
+| HRS-08 | Vest LEDs show distinct hit, low-health, and eliminated states visible from ≥2 m indoors.             | Functional visual test at 2 m distance.                            | Complete |
+| HRS-09 | MPU6050 mounted rigidly, communicates over I2C at 400 kHz, ±4g 16-bit mode configured.                | Inspect mounting + verify register config / bus timing.            | Complete |
 
 ###### 4. Conclusion
 
