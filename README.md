@@ -246,15 +246,8 @@ Risk: IR packet reliability at 3m range hasn't been tested yet — that's a key 
 
 ### 1. Block Diagram:
 
-```
-[Trigger BTN PD2] ──┐
-[Reload BTN PD3] ───┤
-                    ├──► ATmega328P (Transmitter)──► IR LED (PC0) ──► [air]
-[SPI LCD ST7735] ───┘         │
-                              └──► SPI Bus → ST7735 LCD
+![1777425051182](image/README/1777425051182.png)
 
-[air] ──► TSOP38238 (PD2) ──► ATmega328P (Receiver) ──► LED (PB0)
-```
 
 Two ATmega328P MCUs,  one handles user input, LCD feedback, and IR transmission; the other detects incoming IR and signals a hit via LED flash.
 
@@ -266,15 +259,13 @@ We implemented a state machine to manage gameplay states (idle, firing, hit dete
 
 At demo, the system was fully playable ,a user could fire the blaster, register hits on the vest, receive feedback, and reset the game through the web interface.
 
-### 3. Demo your device. 
+### 3. Demo your device.
 
 1. Power on → LCD shows `READY`, ammo = 12
 2. Pull trigger → LCD shows `FIRED`, ammo decrements
 3. Fire until empty → LCD shows `EMPTY`, further triggers blocked
 4. Press reload → LCD shows `RELOADING` (1.5s) → resets to `READY`, ammo = 12
 5. Fire at receiver → hit LED flashes 200ms
-
-
 
 ### 4. Have you achieved some or all of your Software Requirements Specification (SRS)?
 
