@@ -15,7 +15,7 @@
 
 **GitHub Repository URL:  [https://github.com/upenn-embedded/final-project-s26-t2]([https://github.com/upenn-embedded/final-project-s26-t2]())**
 
-**GitHub Pages Website URL:** [for final submission]
+**GitHub Pages Website URL:** https://devmalik771.github.io/Friendly_Fire/
 
 ## Final Project Proposal
 
